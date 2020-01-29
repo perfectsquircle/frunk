@@ -1,19 +1,29 @@
 import { mount, h } from './frunk.js';
 
-const app = function App() {
+const app = function App(props, state) {
   return (
     <div class="foo">
-      <p>Hello, world!</p>
-      <a href="http://example.org">Linky link link</a>
+      <p>{state.message}</p>
+      <a href="http://example.org">Linky link link!</a>
+      <br />
       <Thing yes={true} />
     </div>
   );
 };
 
-function Thing({ yes }) {
+function Thing({ yes }, state) {
   if (yes) {
-    return h('div', {}, 'ZOINKS!');
+    return (
+      <button
+        onclick={e => {
+          console.log('Here!', e);
+          state.message = 'Ouch!!!';
+        }}
+      >
+        Zoinks
+      </button>
+    );
   }
 }
 
-mount(app, document.querySelector('#root'));
+mount(app, document.querySelector('#root'), { message: 'Hello, World!' });
