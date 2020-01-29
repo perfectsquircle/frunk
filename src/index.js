@@ -17,7 +17,7 @@ function Thing({ yes }, state) {
       <button
         onclick={e => {
           console.log('Here!', e);
-          state.message = 'Ouch!!!';
+          state.message = 'Ouch!!! ' + Math.random();
         }}
       >
         Zoinks
