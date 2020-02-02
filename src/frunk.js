@@ -9,9 +9,14 @@ const emptyArray = Object.freeze([]);
  * @param {Node} node
  */
 export function mount(app, node, initialState = {}) {
+  const listeners = [];
   const state = new Proxy(initialState, {
     get(obj, prop) {
-      return obj[prop];
+      // return obj[prop];
+      return listener => {
+        if (listener) listeners.push(listener);
+        return obj[prop];
+      };
     },
     set(obj, prop, nextValue) {
       if (prop in obj) {
@@ -31,13 +36,7 @@ export function mount(app, node, initialState = {}) {
 
   const triggerRender = () => {
     defer(() => {
-      const nextRoot = render();
-      // patch(prevRoot, nextRoot, state);
-      const nextDom = toDom(nextRoot);
-      node.removeChild(prevDom);
-      node.appendChild(nextDom);
-      prevRoot = nextRoot;
-      prevDom = nextDom;
+      listeners.forEach(l => l());
     });
   };
 
@@ -73,6 +72,13 @@ function* nodesToElements(nodes, state) {
 function nodeToElement(node, state) {
   if (typeof node === 'string') {
     return document.createTextNode(node);
+  } else if (typeof node === 'function') {
+    const textNode = document.createTextNode(
+      node(() => {
+        textNode.data = node();
+      })
+    );
+    return textNode;
   }
 
   const element = document.createElement(node.name);
@@ -93,7 +99,18 @@ function setAttribute(element, prop, value) {
       capture: false,
       passive: true
     });
+  } else if (typeof value === 'function') {
+    element.setAttribute(
+      prop,
+      value(() => {
+        element.setAttribute(prop, value());
+      })
+    );
   } else {
     element.setAttribute(prop, value);
   }
 }
+
+function Map() {}
+
+function If() {}
