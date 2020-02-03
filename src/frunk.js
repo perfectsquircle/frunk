@@ -79,6 +79,7 @@ function nodeToElement(node, state) {
       })
     );
     return textNode;
+  } else if (node[Symbol.iterator]) {
   }
 
   const element = document.createElement(node.name);
@@ -99,6 +100,10 @@ function setAttribute(element, prop, value) {
       capture: false,
       passive: true
     });
+  } else if (prop === 'style') {
+    for (let key of Object.keys(value)) {
+      element.style[key] = value[key];
+    }
   } else if (typeof value === 'function') {
     element.setAttribute(
       prop,
@@ -111,6 +116,14 @@ function setAttribute(element, prop, value) {
   }
 }
 
-function Map() {}
+export function* Map({ iterable, callback }) {
+  for (const element of iterable) {
+    yield callback(element);
+  }
+}
 
-function If() {}
+export function If({ condition, children }) {
+  const display = condition ? 'initial' : 'block';
+  // return <div style={{ display }}>{children}</div>;
+  return h();
+}
