@@ -3,6 +3,8 @@ const defer = window.requestAnimationFrame;
 const emptyObject = Object.freeze({});
 const emptyArray = Object.freeze([]);
 
+import { diff } from './diff.js';
+
 /**
  * Mount!
  * @param {Function} node
@@ -33,6 +35,10 @@ export function mount(app, node, initialState = {}) {
     defer(() => {
       const nextRoot = render();
       // patch(prevRoot, nextRoot, state);
+      const diffResults = diff(prevRoot, nextRoot);
+      for (const diffResult of diffResults) {
+        console.dir(diffResult);
+      }
       const nextDom = toDom(nextRoot);
       node.removeChild(prevDom);
       node.appendChild(nextDom);
@@ -76,7 +82,6 @@ function nodeToElement(node, state) {
   }
 
   const element = document.createElement(node.name);
-  node.element = element;
   for (const prop of Object.keys(node.props)) {
     setAttribute(element, prop, node.props[prop]);
   }
