@@ -61,8 +61,15 @@ export function h(name, props, ...children) {
 
 function* nodesToElements(nodes, state) {
   for (const node of nodes) {
-    if (typeof node.name === 'function') {
-      yield nodeToElement(node.name(node.props, state), state);
+    if (typeof node === 'string') {
+      yield document.createTextNode(node);
+    } else if (typeof node.name === 'function') {
+      const rendered = node.name(node.props, state);
+      if (rendered[Symbol.iterator]) {
+        yield* nodesToElements(rendered, state);
+      } else {
+        yield nodeToElement(rendered, state);
+      }
     } else {
       yield nodeToElement(node, state);
     }
@@ -70,16 +77,13 @@ function* nodesToElements(nodes, state) {
 }
 
 function nodeToElement(node, state) {
-  if (typeof node === 'string') {
-    return document.createTextNode(node);
-  } else if (typeof node === 'function') {
+  if (typeof node === 'function') {
     const textNode = document.createTextNode(
       node(() => {
         textNode.data = node();
       })
     );
     return textNode;
-  } else if (node[Symbol.iterator]) {
   }
 
   const element = document.createElement(node.name);
@@ -116,9 +120,19 @@ function setAttribute(element, prop, value) {
   }
 }
 
-export function* Map({ iterable, callback }) {
+export function* OldMap({ iterable, callback }) {
   for (const element of iterable) {
     yield callback(element);
+  }
+}
+
+export function* Map({ iterable, callback }) {
+  if (typeof iterable === 'function') {
+    // iterable will be a function if it came from state.
+    iterable = iterable();
+  }
+  for (const element of iterable) {
+    yield callback(element))
   }
 }
 

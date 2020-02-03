@@ -3,14 +3,6 @@ import { mount, h, Map } from './frunk.js';
 const app = function App(props, state) {
   return (
     <div class="foo">
-      <p>{state.message}</p>
-      <p title="Hello" style={{ backgroundColor: 'yellow' }}>
-        This does work: {state.message}
-      </p>
-      <a href="http://example.org" data-title={state.message + 'nope'}>
-        Linky link link!
-      </a>
-      <br />
       <Map
         iterable={state.todos}
         callback={todo => (
@@ -20,6 +12,14 @@ const app = function App(props, state) {
           </div>
         )}
       />
+      <p>{state.message}</p>
+      <p title="Hello" style={{ backgroundColor: 'yellow' }}>
+        This does work: {state.message}
+      </p>
+      <a href="http://example.org" data-title={state.message + 'nope'}>
+        Linky link link!
+      </a>
+      <br />
       <Thing yes={true} />
     </div>
   );
