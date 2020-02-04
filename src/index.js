@@ -1,11 +1,11 @@
-import { mount, h, Map } from './frunk.js';
+import { mount, Map } from './frunk.js';
 
-const app = function App(props, state) {
+const app = function App(props, { getState, setState, h }) {
   return (
     <div class="foo">
       <h2>Todo list:</h2>
-      <Map
-        iterable={state.todos}
+      {/* <Map
+        iterable={getState(state => state.todos)}
         callback={todo => (
           <div>
             <span>{todo.name}</span>
@@ -16,18 +16,23 @@ const app = function App(props, state) {
             />
           </div>
         )}
-      />
+      /> */}
       <button
-        onclick={e => state.todos().push({ name: 'Get rich', done: false })}
+        onclick={e =>
+          setState(state => state.todos.push({ name: 'Get rich', done: false }))
+        }
       >
         Add Todo
       </button>
       <hr />
-      <p>{state.message}</p>
+      <p>{getState(state => state.message)}</p>
       <p title="Hello" style={{ backgroundColor: 'yellow' }}>
-        This does work: {state.message}
+        This does work: {getState(state => state.message)}
       </p>
-      <a href="http://example.org" data-title={state.message + 'nope'}>
+      <a
+        href="http://example.org"
+        data-title={getState(state => state.message + 'nope')}
+      >
         Linky link link!
       </a>
       <br />
@@ -36,12 +41,12 @@ const app = function App(props, state) {
   );
 };
 
-function Thing({ yes }, state) {
+function Thing({ yes }, { getState, setState, h }) {
   return (
     <button
       onclick={e => {
         console.log('Here!', e);
-        state.message = 'Ouch!!! ' + Math.random();
+        setState(state => (state.message = 'Ouch!!! ' + Math.random()));
       }}
     >
       Zoinks
