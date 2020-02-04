@@ -1,22 +1,26 @@
-import { mount, Map } from './frunk.js';
+import { mount } from './frunk.js';
 
 const app = function App(props, { getState, setState, h }) {
   return (
     <div class="foo">
       <h2>Todo list:</h2>
-      {/* <Map
+      <map
         iterable={getState(state => state.todos)}
-        callback={todo => (
+        callback={(todo, i) => (
           <div>
             <span>{todo.name}</span>
             <input
               type="checkbox"
-              value={todo.done}
-              onchange={e => (todo.done = e.currentTarget.checked)}
+              checked={todo.done}
+              onchange={e =>
+                setState(
+                  state => (state.todos[i].done = e.currentTarget.checked)
+                )
+              }
             />
           </div>
         )}
-      /> */}
+      />
       <button
         onclick={e =>
           setState(state => state.todos.push({ name: 'Get rich', done: false }))
@@ -45,7 +49,6 @@ function Thing({ yes }, { getState, setState, h }) {
   return (
     <button
       onclick={e => {
-        console.log('Here!', e);
         setState(state => (state.message = 'Ouch!!! ' + Math.random()));
       }}
     >

@@ -51,7 +51,9 @@ export class StateAccessor {
   }
 
   update() {
-    this.sideEffect(this.getValue());
+    if (this.sideEffect) {
+      this.sideEffect(this.getValue());
+    }
   }
 
   getValue() {
@@ -102,6 +104,34 @@ function createElement(node, context) {
 }
 
 function nodeToElement(node, context) {
+  if (node.name === 'map') {
+    const element = document.createElement(node.name);
+    const { iterable, callback } = node.props;
+    if (iterable instanceof StateAccessor) {
+      iterable.subscribe(nextValue => {
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+        const nextChildren = nodesToElements(
+          [...map(nextValue, callback)],
+          context
+        );
+        for (const child of nextChildren) {
+          element.appendChild(child);
+        }
+      });
+    } else {
+      const nextChildren = nodesToElements(
+        [...map(nextValue, callback)],
+        context
+      );
+      for (const child of nextChildren) {
+        element.appendChild(child);
+      }
+    }
+    return element;
+  }
+
   const element = document.createElement(node.name);
   node.element = element;
   for (const prop of Object.keys(node.props)) {
@@ -120,6 +150,14 @@ function setAttribute(element, prop, value) {
       capture: false,
       passive: true
     });
+  } else if (prop === 'checked') {
+    if (value instanceof StateAccessor) {
+      value.subscribe(nextValue => {
+        element.checked = !!nextValue;
+      });
+    } else {
+      element.checked = !!value;
+    }
   } else if (prop === 'style') {
     for (let key of Object.keys(value)) {
       element.style[key] = value[key];
@@ -133,26 +171,9 @@ function setAttribute(element, prop, value) {
   }
 }
 
-export function* OldMap({ iterable, callback }) {
+function* map(iterable, callback) {
+  let i = 0;
   for (const element of iterable) {
-    yield callback(element);
+    yield callback(element, i++);
   }
-}
-
-export function Map({ iterable, callback }) {
-  const mapRoot = document.createElement('div');
-  if (iterable instanceof StateAccessor) {
-    // iterable will be a StateAccessor if it came from state.
-    iterable.subscribe(nextValue => {});
-  }
-  // for (const element of iterable) {
-  //   yield callback(element);
-  // }
-  return mapRoot;
-}
-
-export function If({ condition, children }) {
-  const display = condition ? 'initial' : 'block';
-  // return <div style={{ display }}>{children}</div>;
-  return h();
 }
