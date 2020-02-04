@@ -3,15 +3,26 @@ import { mount, h, Map } from './frunk.js';
 const app = function App(props, state) {
   return (
     <div class="foo">
+      <h2>Todo list:</h2>
       <Map
         iterable={state.todos}
         callback={todo => (
           <div>
-            <p>{todo.name}</p>
-            <input type="checkbox" checked={todo.done} />
+            <span>{todo.name}</span>
+            <input
+              type="checkbox"
+              value={todo.done}
+              onchange={e => (todo.done = e.currentTarget.checked)}
+            />
           </div>
         )}
       />
+      <button
+        onclick={e => state.todos().push({ name: 'Get rich', done: false })}
+      >
+        Add Todo
+      </button>
+      <hr />
       <p>{state.message}</p>
       <p title="Hello" style={{ backgroundColor: 'yellow' }}>
         This does work: {state.message}

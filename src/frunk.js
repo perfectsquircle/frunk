@@ -10,26 +10,38 @@ const emptyArray = Object.freeze([]);
  */
 export function mount(app, node, initialState = {}) {
   const listeners = [];
-  const state = new Proxy(initialState, {
-    get(obj, prop) {
-      // return obj[prop];
-      return listener => {
-        if (listener) listeners.push(listener);
-        return obj[prop];
-      };
-    },
-    set(obj, prop, nextValue) {
-      if (prop in obj) {
-        const prevValue = obj[prop];
-        const changed = !eq(prevValue, nextValue);
-        if (changed) {
-          obj[prop] = nextValue;
-          triggerRender();
+
+  function Observable(target) {
+    return new Proxy(target, {
+      get(obj, prop) {
+        return listener => {
+          if (listener) listeners.push(listener);
+          return obj[prop];
+        };
+        // if (Array.isArray(obj[prop])) {
+        //   return Observable(obj[prop]);
+        // } else {
+        //   return obj[prop];
+        // }
+      },
+      set(obj, prop, nextValue) {
+        if (prop in obj) {
+          const prevValue = obj[prop];
+          const changed = !eq(prevValue, nextValue);
+          if (changed) {
+            obj[prop] = nextValue;
+            triggerRender();
+          }
+          return true;
         }
-        return true;
       }
-    }
-  });
+    });
+  }
+
+  const state = (window.state = Observable(initialState));
+  // state.subscribe = listener => {
+  //   listeners.push(listener);
+  // };
 
   const render = () => app({}, state);
   const toDom = rootNode => nodeToElement(rootNode, state);
@@ -132,7 +144,7 @@ export function* Map({ iterable, callback }) {
     iterable = iterable();
   }
   for (const element of iterable) {
-    yield callback(element))
+    yield callback(element);
   }
 }
 
