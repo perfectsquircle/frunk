@@ -3,67 +3,50 @@ import { mount } from './frunk.js';
 const app = function App(props, { getState, setState, h }) {
   return (
     <div class="foo">
-      <h2>Todo list:</h2>
+      <h2>My todo list:</h2>
       <map
         iterable={getState(state => state.todos)}
         callback={(todo, i) => (
           <div>
-            <span>{todo.name}</span>
-            <input
-              type="checkbox"
-              checked={todo.done}
-              onchange={e =>
-                setState(
-                  state => (state.todos[i].done = e.currentTarget.checked)
-                )
-              }
-            />
+            <label>
+              <input
+                type="checkbox"
+                checked={todo.done}
+                onchange={e =>
+                  setState(
+                    state => (state.todos[i].done = e.currentTarget.checked)
+                  )
+                }
+              />
+              {todo.name}
+            </label>
           </div>
         )}
       />
-      <button
-        onclick={e =>
-          setState(state => state.todos.push({ name: 'Get rich', done: false }))
-        }
+      <form
+        onsubmit={e => {
+          e.preventDefault();
+          setState(state =>
+            state.todos.push({ name: e.currentTarget.todo.value, done: false })
+          );
+          e.currentTarget.todo.value = '';
+          return false;
+        }}
       >
-        Add Todo
-      </button>
-      <hr />
-      <p>{getState(state => state.message)}</p>
-      <p title="Hello" style={{ backgroundColor: 'yellow' }}>
-        This does work: {getState(state => state.message)}
-      </p>
-      <a
-        href="http://example.org"
-        data-title={getState(state => state.message + 'nope')}
-      >
-        Linky link link!
-      </a>
-      <br />
-      <Thing yes={true} />
+        <input type="text" name="todo" />
+        <button>Add Todo</button>
+      </form>
     </div>
   );
 };
 
-function Thing({ yes }, { getState, setState, h }) {
-  return (
-    <button
-      onclick={e => {
-        setState(state => (state.message = 'Ouch!!! ' + Math.random()));
-      }}
-    >
-      Zoinks
-    </button>
-  );
-}
-
 mount(app, document.querySelector('#root'), {
-  message: 'Hello, World!',
   todos: [
     {
       name: 'Get lit.',
       done: false
     },
     { name: 'Get woke.', done: false }
-  ]
+  ],
+  nextTodo: ''
 });

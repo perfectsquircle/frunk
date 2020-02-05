@@ -148,7 +148,7 @@ function setAttribute(element, prop, value) {
     const eventType = prop.replace('on', '');
     element.addEventListener(eventType, value, {
       capture: false,
-      passive: true
+      passive: false
     });
   } else if (prop === 'checked') {
     if (value instanceof StateAccessor) {
