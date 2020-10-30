@@ -1,22 +1,18 @@
 import { mount } from './frunk.js';
 
-const app = function App(props, { getState, setState, h }) {
+const app = function App(props, { state, h }) {
   return (
     <div class="foo">
       <h2>My todo list:</h2>
       <map
-        iterable={getState(state => state.todos)}
+        iterable={state.todos}
         callback={(todo, i) => (
-          <div>
+          <div key={i}>
             <label>
               <input
                 type="checkbox"
                 checked={todo.done}
-                onchange={e =>
-                  setState(
-                    state => (state.todos[i].done = e.currentTarget.checked)
-                  )
-                }
+                onchange={e => (state.todos[i].done = e.currentTarget.checked)}
               />
               {todo.name}
             </label>
@@ -26,9 +22,7 @@ const app = function App(props, { getState, setState, h }) {
       <form
         onsubmit={e => {
           e.preventDefault();
-          setState(state =>
-            state.todos.push({ name: e.currentTarget.todo.value, done: false })
-          );
+          state.todos.push({ name: e.currentTarget.todo.value, done: false });
           e.currentTarget.todo.value = '';
           return false;
         }}
@@ -44,9 +38,9 @@ mount(app, document.querySelector('#root'), {
   todos: [
     {
       name: 'Get lit.',
-      done: false
+      done: false,
     },
-    { name: 'Get woke.', done: false }
+    { name: 'Get woke.', done: false },
   ],
-  nextTodo: ''
+  nextTodo: '',
 });
